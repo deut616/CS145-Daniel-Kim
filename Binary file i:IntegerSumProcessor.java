@@ -1,46 +1,55 @@
+package integersumprocessor;
+
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger; //logger import instead of printstacktrace method.
 
-
- 
-public class IntegerSumProcessor {
-
-    private static final Logger LOGGER = Logger.getLogger(IntegerSumProcessor.class.getName());
+public class Exercise17_03 {
 
     public static void main(String[] args) {
-        // Use a path variable or config—never hardcode inside the logic
-        Path filePath = Paths.get("Exercise17_3.dat");
-        
-        if (!Files.exists(filePath)) {
-            LOGGER.log(Level.SEVERE, "Target file {0} does not exist.", filePath);
+        File file = new File("Exercise17_3.dat");
+        generateBinaryFile(file);
+
+        //  Read the binary file, print integers, and sum them
+        if (!file.exists()) {
+            System.err.println("File not found: " + file.getName());
             return;
         }
 
-        long totalSum = calculateSum(filePath);
-        System.out.printf("Processing complete. Total sum: %,d%n", totalSum);
+        try {
+            long totalSum = readAndSumIntegers(file);
+            System.out.println("Processing complete. Total sum: " + totalSum);
+        } catch (IOException e) {
+            System.err.println("Error reading the binary file.");
+            e.printStackTrace();
+        }
     }
 
-    /**
-     * Logic is separated into its own method for testability.
-     */
-    public static long calculateSum(Path path) {
-        long sum = 0; // Use long to prevent integer overflow for large files
-
-        try (DataInputStream input = new DataInputStream(new BufferedInputStream(new FileInputStream(path.toFile())))) {
-            // Check available bytes instead of waiting for an exception to crash the loop
-            while (input.available() >= 4) { 
-                sum += input.readInt();
+    // binary file generation w/ 100 random integers
+    private static void generateBinaryFile(File file) {
+        try (DataOutputStream output = new DataOutputStream(new FileOutputStream(file))) {
+            for (int i = 0; i < 100; i++) {
+                int randomNumber = (int) (Math.random() * 100000);
+                output.writeInt(randomNumber);
             }
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Error reading binary file: " + path, e);
+            System.err.println("Error creating the binary file.");
+            e.printStackTrace();
+        }
+    }
+
+    private static long readAndSumIntegers(File file) throws IOException {
+        long sum = 0;
+
+        try (DataInputStream input = new DataInputStream(new FileInputStream(file))) {
+            while (input.available() > 0) {
+                int number = input.readInt();
+                System.out.println(number); // print each integer
+                sum += number;
+            }
         }
 
         return sum;
     }
 }
+
 
 
