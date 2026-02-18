@@ -5,30 +5,55 @@ import java.util.Map;
 
 public class Fibonacci {
     private static int callCount = 0;
-    // Using a Map for memoization to prevent the program from hanging
+    // Map for memoization
     private static Map<Integer, BigInteger> memo = new HashMap<>();
-//the map or HashMap allows  storing previously computed Fibonacci numbers to reuse them 
+
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        System. out.print("Enter the position: ");
+        System.out.print("Enter the position (n): ");
         
-        if (input.hasNextInt()) {
-            int n = input.nextInt();
-            System. out.println("Result: " + fibonacci(n));
-            System. out.println("Total calls: " + callCount);
+        try {
+            if (input.hasNextInt()) {
+                int n = input.nextInt();
+                
+                // Call the recursive function and print results
+                BigInteger result = fibonacci(n);
+                
+                System.out.println("Fibonacci position " + n + " is: " + result);
+                System.out.println("Total recursive calls made: " + callCount);
+            } else {
+                System.out.println("Error: Please enter a valid integer.");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        } finally {
+            input.close();
         }
-        input.close();
     }
 
+    /**
+     * Calculates the nth Fibonacci number using recursion and memoization.
+     * Logic: F(n) = F(n-1) + F(n-2)
+     */
     public static BigInteger fibonacci(int n) {
         callCount++;
+        
+        //Error Handling
         if (n < 0) throw new IllegalArgumentException("Negative input not allowed");
 
-        // Check for already calculated this number
+        // Base Cases
+        if (n == 0) return BigInteger.ZERO;
+        if (n == 1) return BigInteger.ONE;
+
+        // Memoization Check
         if (memo.containsKey(n)) return memo.get(n);
 
+        //Recursive Step: Calculate F(n-1) + F(n-2)
         BigInteger result = fibonacci(n - 1).add(fibonacci(n - 2));
-        memo.put(n, result); // Store it for later
+        
+        // Store the result in the map before returning
+        memo.put(n, result); 
+        
         return result;
     }
 }
