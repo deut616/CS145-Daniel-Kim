@@ -1,19 +1,18 @@
-# Memoization dictionary- for faster recursion
-found_values = {0: 0, 1: 1}
+found_values = {0: 0, 1: 1}  # Memoization
+call_count = 0
 
-def get_fib(num):
-    if num < 0:
-        return "Not possible"
-    
-    # Check if we already did the math
-    if num in found_values:
-        return found_values[num]
-    
-    #  Recursion
-    val = get_fib(num - 1) + get_fib(num - 2)
-    found_values[num] = val
+def get_fib(n):
+    global call_count
+    call_count += 1
+    if n < 0:
+        raise ValueError("Negative input not allowed")
+    if n in found_values:
+        return found_values[n]
+    val = get_fib(n - 1) + get_fib(n - 2)
+    found_values[n] = val
     return val
 
-# --- Test ---
-user_num = int(input("Which fibonacci number do you need? "))
-print(f"The answer is {get_fib(user_num)}")
+n = int(input("Enter an index for Fibonacci number: "))
+result = get_fib(n)
+print(f"Fibonacci number at index {n} is: {result}")
+print(f"Total calls to get_fib: {call_count}")
