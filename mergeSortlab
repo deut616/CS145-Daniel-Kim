@@ -1,0 +1,325 @@
+// Daniel Kim
+// 06/14
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+
+public class SortingGUI extends JFrame {
+
+    private ArrayList<Integer> numbers;
+    private JTextField inputField;
+    private JTextArea displayArea;
+    private JLabel timeLabel;
+
+    // BONUS: tracks whether we sort ascending or descending
+    private boolean ascending = true;
+
+    public SortingGUI() {
+        numbers = new ArrayList<>();
+
+        setTitle("Sorting Algorithm GUI");
+        setSize(600, 500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        setupInputPanel();
+        setupDisplayArea();
+        setupButtonPanel();
+
+        setVisible(true);
+    }
+
+    private void setupInputPanel() {
+        JPanel inputPanel = new JPanel();
+
+        inputField = new JTextField(10);
+        JButton addButton = new JButton("Add Number");
+        JButton resetButton = new JButton("Reset");
+
+        // BONUS: toggle button for sort order
+        JToggleButton orderToggle = new JToggleButton("Ascending");
+        orderToggle.addActionListener(e -> {
+            ascending = !orderToggle.isSelected();
+            orderToggle.setText(ascending ? "Ascending" : "Descending");
+        });
+
+        addButton.addActionListener(e -> addNumber());
+        resetButton.addActionListener(e -> resetNumbers());
+
+        inputPanel.add(new JLabel("Enter number:"));
+        inputPanel.add(inputField);
+        inputPanel.add(addButton);
+        inputPanel.add(resetButton);
+        inputPanel.add(orderToggle);
+
+        add(inputPanel, BorderLayout.NORTH);
+    }
+
+    private void setupDisplayArea() {
+        displayArea = new JTextArea();
+        displayArea.setEditable(false);
+
+        timeLabel = new JLabel("Sorting time: ");
+
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(new JScrollPane(displayArea), BorderLayout.CENTER);
+        centerPanel.add(timeLabel, BorderLayout.SOUTH);
+
+        add(centerPanel, BorderLayout.CENTER);
+    }
+
+    private void setupButtonPanel() {
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 5));
+
+        JButton selectionButton = new JButton("Selection Sort");
+        JButton insertionButton = new JButton("Insertion Sort");
+        JButton bubbleButton   = new JButton("Bubble Sort");
+        JButton mergeButton    = new JButton("Merge Sort");
+        JButton quickButton    = new JButton("Quick Sort");
+
+        selectionButton.addActionListener(e -> sortAndTime("Selection Sort"));
+        insertionButton.addActionListener(e -> sortAndTime("Insertion Sort"));
+        bubbleButton.addActionListener(e   -> sortAndTime("Bubble Sort"));
+        mergeButton.addActionListener(e    -> sortAndTime("Merge Sort"));
+        quickButton.addActionListener(e    -> sortAndTime("Quick Sort"));
+
+        buttonPanel.add(selectionButton);
+        buttonPanel.add(insertionButton);
+        buttonPanel.add(bubbleButton);
+        buttonPanel.add(mergeButton);
+        buttonPanel.add(quickButton);
+
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void addNumber() {
+        try {
+            int value = Integer.parseInt(inputField.getText());
+            numbers.add(value);
+            inputField.setText("");
+            updateDisplay();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid integer.");
+        }
+    }
+
+    private void resetNumbers() {
+        numbers.clear();
+        updateDisplay();
+        timeLabel.setText("Sorting time: ");
+    }
+
+    private void updateDisplay() {
+        displayArea.setText(numbers.toString());
+    }
+
+    private void sortAndTime(String algorithm) {
+        int[] array = numbersToArray();
+
+        long startTime = System.nanoTime();
+
+        if (algorithm.equals("Selection Sort")) {
+            selectionSort(array);
+        } else if (algorithm.equals("Insertion Sort")) {
+            insertionSort(array);
+        } else if (algorithm.equals("Bubble Sort")) {
+            bubbleSort(array);
+        } else if (algorithm.equals("Merge Sort")) {
+            mergeSort(array, 0, array.length - 1);
+        } else if (algorithm.equals("Quick Sort")) {
+            quickSort(array, 0, array.length - 1);
+        }
+
+        long endTime = System.nanoTime();
+
+        arrayToNumbers(array);
+        updateDisplay();
+
+        timeLabel.setText(algorithm + " time: " + (endTime - startTime) + " nanoseconds");
+    }
+
+    private int[] numbersToArray() {
+        int[] array = new int[numbers.size()];
+        for (int i = 0; i < numbers.size(); i++) {
+            array[i] = numbers.get(i);
+        }
+        return array;
+    }
+
+    private void arrayToNumbers(int[] array) {
+        numbers.clear();
+        for (int value : array) {
+            numbers.add(value);
+        }
+    }
+
+    // -------------------------
+    // Already Implemented Sorts
+    // -------------------------
+
+    private void selectionSort(int[] array) {
+        for (int i = 0; i < array.length - 1; i++) {
+            int targetIndex = i;
+            for (int j = i + 1; j < array.length; j++) {
+                // BONUS: flip comparison based on sort order
+                if (ascending ? array[j] < array[targetIndex]
+                              : array[j] > array[targetIndex]) {
+                    targetIndex = j;
+                }
+            }
+            int temp = array[i];
+            array[i] = array[targetIndex];
+            array[targetIndex] = temp;
+        }
+    }
+
+    private void insertionSort(int[] array) {
+        for (int i = 1; i < array.length; i++) {
+            int valueToInsert = array[i];
+            int j = i - 1;
+            // BONUS: flip comparison based on sort order
+            while (j >= 0 && (ascending ? array[j] > valueToInsert
+                                        : array[j] < valueToInsert)) {
+                array[j + 1] = array[j];
+                j--;
+            }
+            array[j + 1] = valueToInsert;
+        }
+    }
+
+    private void bubbleSort(int[] array) {
+        boolean swapped = true;
+        while (swapped) {
+            swapped = false;
+            for (int i = 0; i < array.length - 1; i++) {
+                // BONUS: flip comparison based on sort order
+                if (ascending ? array[i] > array[i + 1]
+                              : array[i] < array[i + 1]) {
+                    int temp = array[i];
+                    array[i] = array[i + 1];
+                    array[i + 1] = temp;
+                    swapped = true;
+                }
+            }
+        }
+    }
+
+    // -------------------------
+    // Merge Sort Implementation
+    // -------------------------
+
+    private void mergeSort(int[] array, int left, int right) {
+        // Base case: a section of one element or no elements is already sorted
+        if (left >= right) return;
+
+        // Find the middle index
+        int middle = (left + right) / 2;
+
+        // Recursively sort the left half
+        mergeSort(array, left, middle);
+
+        // Recursively sort the right half
+        mergeSort(array, middle + 1, right);
+
+        // Merge the two sorted halves back together
+        merge(array, left, middle, right);
+    }
+
+    private void merge(int[] array, int left, int middle, int right) {
+        // Calculate sizes of the two temporary arrays
+        int leftSize  = middle - left + 1;
+        int rightSize = right - middle;
+
+        // Create temporary arrays and copy values in
+        int[] leftTemp  = new int[leftSize];
+        int[] rightTemp = new int[rightSize];
+
+        for (int i = 0; i < leftSize; i++)
+            leftTemp[i] = array[left + i];
+        for (int j = 0; j < rightSize; j++)
+            rightTemp[j] = array[middle + 1 + j];
+
+        // Three indexes: one for each temp array, one for the original
+        int i = 0, j = 0, k = left;
+
+        // Compare values from both temp arrays and place the correct one back
+        while (i < leftSize && j < rightSize) {
+            // BONUS: flip comparison based on sort order
+            if (ascending ? leftTemp[i] <= rightTemp[j]
+                          : leftTemp[i] >= rightTemp[j]) {
+                array[k] = leftTemp[i];
+                i++;
+            } else {
+                array[k] = rightTemp[j];
+                j++;
+            }
+            k++;
+        }
+
+        // Copy any remaining values from the left temp array
+        while (i < leftSize) {
+            array[k] = leftTemp[i];
+            i++;
+            k++;
+        }
+
+        // Copy any remaining values from the right temp array
+        while (j < rightSize) {
+            array[k] = rightTemp[j];
+            j++;
+            k++;
+        }
+    }
+
+    // --------------------------
+    // Quick Sort Implementation
+    // --------------------------
+
+    private void quickSort(int[] array, int low, int high) {
+        // Base case: a section of one element or no elements is already sorted
+        if (low >= high) return;
+
+        // Partition the array and get the final pivot index
+        int pivotIndex = partition(array, low, high);
+
+        // Recursively sort the left partition (everything before pivot)
+        quickSort(array, low, pivotIndex - 1);
+
+        // Recursively sort the right partition (everything after pivot)
+        quickSort(array, pivotIndex + 1, high);
+    }
+
+    private int partition(int[] array, int low, int high) {
+        // Use the last element as the pivot
+        int pivot = array[high];
+
+        // i tracks where the next smaller-than-pivot value should go
+        int i = low - 1;
+
+        // Loop through the array from low to high - 1
+        for (int j = low; j < high; j++) {
+            // BONUS: flip comparison based on sort order
+            if (ascending ? array[j] <= pivot
+                          : array[j] >= pivot) {
+                i++;
+                // Swap array[i] and array[j] into the left partition
+                int temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        // Move the pivot into its final sorted position
+        int temp = array[i + 1];
+        array[i + 1] = array[high];
+        array[high] = temp;
+
+        // Return the pivot index
+        return i + 1;
+    }
+
+    public static void main(String[] args) {
+        new SortingGUI();
+    }
+}
